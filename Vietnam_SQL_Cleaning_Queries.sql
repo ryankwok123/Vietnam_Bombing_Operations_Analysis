@@ -1,25 +1,66 @@
 --cleaning data in all tables
---need to find a way to standardize the dates
+--Standardize the dates
+/*
 select distinct MSNDATE, Convert(date, MSNDATE) as MSNDATE_Converted
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
 order by MSNDATE_Converted
+
+--adding new MSNDATE column to the table labelled MSNDATE_Converted
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1965] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
 
 select distinct MSNDATE, Convert(date, MSNDATE) as MSNDATE_Converted
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
 order by MSNDATE_Converted
 
+--repeat msndate conversion for other 1966
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1966] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
+
 select distinct MSNDATE, Convert(date, MSNDATE) as MSNDATE_Converted
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
 order by MSNDATE_Converted
+
+--repeat msndate conversion for other 1967
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1967] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
 
 --leap year
 select distinct MSNDATE, Convert(date, MSNDATE) as MSNDATE_Converted
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
 order by MSNDATE_Converted
 
+--repeat msndate conversion for other 1968
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1968] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
+
 select distinct MSNDATE, Convert(date, MSNDATE) as MSNDATE_Converted
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
 order by MSNDATE_Converted
+
+--repeat msndate conversion for other 1969
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1969] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
 
 --for some reason, 1970 appears to have 2 rows per date as well as one invalid date FEB 29th (1970 is not a leap year)
 --when returning MSNDATE there are exactly 731 rows, 365*2 is 730 so removing the invalid date suggests dates are doubled up
@@ -43,6 +84,12 @@ group by EOMONTH(MSNDATE_Converted)
 --order by MSNDATE_Converted
 */
 
+--repeat msndate conversion for other 1970
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1970] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
+set MSNDATE_Converted = Try_Convert(date, MSNDATE) --there is one invalid date (feb 29th) that needs to be removed
 
 
 --1971 has 367 rows instead of 365 
@@ -65,6 +112,13 @@ from comparing_days_per_month
 group by EOMONTH(MSNDATE_Converted)
 --order by MSNDATE_Converted
 */
+
+--repeat msndate conversion for other 1971
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1971] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1971]
+set MSNDATE_Converted = Convert(date, MSNDATE)
 
 
 --1972 has 367 rows, it's a leap year but what's the extra date? 
@@ -99,6 +153,13 @@ group by EOMONTH(MSNDATE_Converted)
 --order by MSNDATE_Converted
 */
 
+--repeat msndate conversion for other 1972
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1972] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1972]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
 
 --1973 has 368 rows
 --April 19th, May 4th, July 12th incorrect format
@@ -118,6 +179,13 @@ from comparing_days_per_month
 group by EOMONTH(MSNDATE_Converted)
 --order by MSNDATE_Converted
 */
+
+--repeat msndate conversion for other 1973
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1973] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1973]
+set MSNDATE_Converted = Convert(date, MSNDATE)
 
 
 --1974 has 366 rows
@@ -139,6 +207,13 @@ group by EOMONTH(MSNDATE_Converted)
 --order by MSNDATE_Converted
 */
 
+--repeat msndate conversion for other 1974
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+
 
 --why does the data extend past the end of the vietnam war?
 --kinetic missions targeting south vietnam stop abruptly after the fall of saigon, 
@@ -148,6 +223,13 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
 where MFUNC_DESC_CLASS = 'KINETIC' --AND MSNDATE_Converted <= April 30th, 1975
 order by MSNDATE_Converted
 
+--repeat msndate conversion for other 1975
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+add MSNDATE_Converted date;
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
+set MSNDATE_Converted = Convert(date, MSNDATE)
+*/
 ---------------------------------------------------------------------------------------------------------
 
 --combining years together to form views for visualizations
@@ -179,7 +261,7 @@ with replace_null as (
 Select MILSERVICE, ISNULL(MILSERVICE, 'OTHER') as MILSERVICE_FORMATTED
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
 )
-Select MILSERVICE, MILSERVICE_FORMATTED, COUNT(MILSERVICE_FORMATTED)
+Select MILSERVICE, MILSERVICE_FORMATTED, COUNT(MILSERVICE_FORMATTED) num_missions_by_branch
 from replace_null
 group by MILSERVICE, MILSERVICE_FORMATTED
 
@@ -220,6 +302,8 @@ order by PERIODOFDAY_Count desc
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
+
+/*
 select PERIODOFDAY, 
 CASE
     WHEN PERIODOFDAY = 'M' THEN 'D' 
@@ -229,6 +313,19 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--creating new column PERIODOFDAY_Standardized 
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1965] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
@@ -242,6 +339,18 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
 
+--repeat new column PERIODOFDAY_Standardized for 1966
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1966] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
 select PERIODOFDAY, 
@@ -253,6 +362,19 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--repeat new column PERIODOFDAY_Standardized for 1967
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1967] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
@@ -266,6 +388,18 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
 
+--repeat new column PERIODOFDAY_Standardized for 1968
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1968] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
 select PERIODOFDAY, 
@@ -277,6 +411,18 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--repeat new column PERIODOFDAY_Standardized for 1969
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1969] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
@@ -290,6 +436,18 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
 
+--repeat new column PERIODOFDAY_Standardized for 1970
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1970] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
 select PERIODOFDAY, 
@@ -301,6 +459,18 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1971]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--repeat new column PERIODOFDAY_Standardized for 1971
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1971] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1971]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
@@ -314,6 +484,18 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1972]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
 
+--repeat new column PERIODOFDAY_Standardized for 1972
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1972] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1972]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
 select PERIODOFDAY, 
@@ -325,6 +507,17 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1973]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--repeat new column PERIODOFDAY_Standardized for 1973
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1973] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1973]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
 
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
@@ -338,6 +531,18 @@ from [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
 
+--repeat new column PERIODOFDAY_Standardized for 1974
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+
+
 --Standardizing the Morning and Night Values 
 --do this for all tables!!!
 select PERIODOFDAY, 
@@ -346,9 +551,22 @@ CASE
     WHEN PERIODOFDAY = 'E' THEN 'N'
 	ELSE PERIODOFDAY
 END as PERIODOFDAY_Standardized
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+
+--repeat new column PERIODOFDAY_Standardized for 1975
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+add PERIODOFDAY_Standardized varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
+set PERIODOFDAY_Standardized = CASE
+    WHEN PERIODOFDAY = 'M' THEN 'D' 
+    WHEN PERIODOFDAY = 'E' THEN 'N'
+	ELSE PERIODOFDAY
+END 
+*/
+
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --time data is riddled with errors:
 	--ambigious midnight (24:00 exists as well as 00:00)
