@@ -167,17 +167,21 @@ from combined
 
 --number of missions flown by country (bar graph)
 Select COUNTRYFLYINGMISSION, count(THOR_DATA_VIET_ID) as num_missions_flown_by_country
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
 where COUNTRYFLYINGMISSION is not null
 group by COUNTRYFLYINGMISSION
 
 ---------------------------------------------------------------------------------------------------------
+--number missions flown by branch (pie chart)
 
---number missions flown by branch 
-Select MILSERVICE, count(THOR_DATA_VIET_ID) as num_missions_flown_by_branch
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
-where MILSERVICE is not null
-group by MILSERVICE
+with replace_null as (
+--query that replaces nulls in MILSERVICE with OTHER
+Select MILSERVICE, ISNULL(MILSERVICE, 'OTHER') as MILSERVICE_FORMATTED
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
+)
+Select MILSERVICE, MILSERVICE_FORMATTED, COUNT(MILSERVICE_FORMATTED)
+from replace_null
+group by MILSERVICE, MILSERVICE_FORMATTED
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -188,7 +192,7 @@ order by MSNDATE_Converted
 
 ---------------------------------------------------------------------------------------------------------
 
---number of missions flown by each type of aircraft
+--number of missions flown by each type of aircraft (bubble chart)
 select AIRCRAFT_ORIGINAL, count(AIRCRAFT_ORIGINAL) as num_missions_flown_by_aircraft
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
 group by AIRCRAFT_ORIGINAL 
@@ -204,61 +208,8 @@ having count(AIRCRAFT_ORIGINAL) > 1
 order by num_missions_flown_by_validaircraft desc
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
---time data is riddled with errors:
-	--ambigious midnight (24:00 exists as well as 00:00)
-	--several data entry errors, 24:00 should actually be 00:00, 15:70 doesn't exist probably misread 2 as 7
-	--nonsensical time values such as 61:41 are prevalent 
 
---you can still use this time data but with heavy filtering involved 
---(ie, cutting out all nulls and only including valid values for the sake of demonstration)
-
-/*
---calculate average mission duration for each aircraft 
-select try_cast(TIMEONTARGET as time), TIMEOFFTARGET
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
-
-
---manipulating by inserting colons so that the values can be converted to datetime
---what should we do with zeros and nulls? 
-with format_time as (
-select TIMEONTARGET,
-CASE
-    WHEN len(TIMEONTARGET) = 4 THEN LEFT(timeontarget,2) + ':' + RIGHT(timeontarget,2) --insert colon in the middle
-    WHEN len(TIMEONTARGET) = 3 THEN LEFT(timeontarget,1) + ':' + RIGHT(timeontarget,2) --insert colon in the middle
-    WHEN len(TIMEONTARGET) = 2 THEN '00:' + TIMEONTARGET --add two zeros then insert colon (assuming minutes) 
-	WHEN len(TIMEONTARGET) = 1 THEN '00:0' + TIMEONTARGET --add two zeros then colon then zero again (assuming minutes)
-END as TIMEONTARGET_Formatted,
-
-TIMEOFFTARGET,
-CASE
-    WHEN len(TIMEOFFTARGET) = 4 THEN LEFT(TIMEOFFTARGET,2) + ':' + RIGHT(TIMEOFFTARGET,2) --insert colon in the middle
-    WHEN len(TIMEOFFTARGET) = 3 THEN LEFT(TIMEOFFTARGET,1) + ':' + RIGHT(TIMEOFFTARGET,2) --insert colon in the middle
-    WHEN len(TIMEOFFTARGET) = 2 THEN '00:' + TIMEOFFTARGET --add two zeros then insert colon (assuming minutes) 
-	WHEN len(TIMEOFFTARGET) = 1 THEN '00:0' + TIMEOFFTARGET --add two zeros then colon then zero again (assuming minutes)
-END as TIMEOFFTARGET_Formatted
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
---where len(TIMEONTARGET) = 1 and TIMEONTARGET <> 0
-), 
---second cte
-time_diff as (
-select TIMEONTARGET, TIMEONTARGET_Formatted, try_cast(TIMEONTARGET_Formatted as time) as TIMEONTARGET_Converted,
-TIMEOFFTARGET, TIMEOFFTARGET_Formatted, try_cast(TIMEOFFTARGET_Formatted as time) as TIMEOFFTARGET_Converted
-from format_time
-)
---calculate the minute difference between time on and time off, datediff???
-select TIMEONTARGET, TIMEONTARGET_Formatted, TIMEONTARGET_Converted, TIMEOFFTARGET, TIMEOFFTARGET_Formatted, TIMEOFFTARGET_Converted, 
-datediff(minute, TIMEONTARGET_Converted, TIMEOFFTARGET_Converted) as time_diff_mins
-from time_diff
-order by time_diff_mins 
---a lot of nulls where there shouldn't be, these are invalid times 
---(ie. 24:00 should actually be 00:00, 15:70 doesn't exist probably misread 2 as 7 *facepalm*)
---getting picked up as values by the LEN() function
---also, negative time diff values need to be fixed
-*/
-
--------------------------------------------------------------------------------------------------------------------------------------------------
-
---looking at the period of day missions took place in
+--looking at the period of day missions took place in (bubble chart description)
 --Day: D, Night: N, Evening: E, Morning: M
 --need to standardize the missions so that evening missions are night and morning missions are day (1965-1970)
 --for the visualization, drop all the other labels other than day and night after the standardization
@@ -398,7 +349,162 @@ END as PERIODOFDAY_Standardized
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
 WHERE PERIODOFDAY IN('M', 'E')
 ORDER BY PERIODOFDAY_Standardized
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--time data is riddled with errors:
+	--ambigious midnight (24:00 exists as well as 00:00)
+	--several data entry errors, 24:00 should actually be 00:00, 15:70 doesn't exist probably misread 2 as 7
+	--nonsensical time values such as 61:41 are prevalent 
+
+--you can still use this time data but with heavy filtering involved 
+--(ie, cutting out all nulls and only including valid values for the sake of demonstration)
+
+/*
+--calculate average mission duration for each aircraft 
+select try_cast(TIMEONTARGET as time), TIMEOFFTARGET
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+
+
+--manipulating by inserting colons so that the values can be converted to datetime
+--what should we do with zeros and nulls? 
+with format_time as (
+select TIMEONTARGET,
+CASE
+    WHEN len(TIMEONTARGET) = 4 THEN LEFT(timeontarget,2) + ':' + RIGHT(timeontarget,2) --insert colon in the middle
+    WHEN len(TIMEONTARGET) = 3 THEN LEFT(timeontarget,1) + ':' + RIGHT(timeontarget,2) --insert colon in the middle
+    WHEN len(TIMEONTARGET) = 2 THEN '00:' + TIMEONTARGET --add two zeros then insert colon (assuming minutes) 
+	WHEN len(TIMEONTARGET) = 1 THEN '00:0' + TIMEONTARGET --add two zeros then colon then zero again (assuming minutes)
+END as TIMEONTARGET_Formatted,
+
+TIMEOFFTARGET,
+CASE
+    WHEN len(TIMEOFFTARGET) = 4 THEN LEFT(TIMEOFFTARGET,2) + ':' + RIGHT(TIMEOFFTARGET,2) --insert colon in the middle
+    WHEN len(TIMEOFFTARGET) = 3 THEN LEFT(TIMEOFFTARGET,1) + ':' + RIGHT(TIMEOFFTARGET,2) --insert colon in the middle
+    WHEN len(TIMEOFFTARGET) = 2 THEN '00:' + TIMEOFFTARGET --add two zeros then insert colon (assuming minutes) 
+	WHEN len(TIMEOFFTARGET) = 1 THEN '00:0' + TIMEOFFTARGET --add two zeros then colon then zero again (assuming minutes)
+END as TIMEOFFTARGET_Formatted
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+--where len(TIMEONTARGET) = 1 and TIMEONTARGET <> 0
+), 
+--second cte
+time_diff as (
+select TIMEONTARGET, TIMEONTARGET_Formatted, try_cast(TIMEONTARGET_Formatted as time) as TIMEONTARGET_Converted,
+TIMEOFFTARGET, TIMEOFFTARGET_Formatted, try_cast(TIMEOFFTARGET_Formatted as time) as TIMEOFFTARGET_Converted
+from format_time
+)
+--calculate the minute difference between time on and time off, datediff???
+select TIMEONTARGET, TIMEONTARGET_Formatted, TIMEONTARGET_Converted, TIMEOFFTARGET, TIMEOFFTARGET_Formatted, TIMEOFFTARGET_Converted, 
+datediff(minute, TIMEONTARGET_Converted, TIMEOFFTARGET_Converted) as time_diff_mins
+from time_diff
+order by time_diff_mins 
+--a lot of nulls where there shouldn't be, these are invalid times 
+--(ie. 24:00 should actually be 00:00, 15:70 doesn't exist probably misread 2 as 7 *facepalm*)
+--getting picked up as values by the LEN() function
+--also, negative time diff values need to be fixed
+*/
+
 ---------------------------------------------------------------------------------------------------------
 --Operations by day on a map filter by country (geo)
-select TGTLONDDD_DDD_WGS84, TGTLATDD_DDD_WGS84
-from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+select TGTLATDD_DDD_WGS84, TGTLONDDD_DDD_WGS84, TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84 as Lat_Long
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+--where TGTLATDD_DDD_WGS84 is not null and TGTLONDDD_DDD_WGS84 is not null
+
+
+--Adding the new longitude and latitude column to the table
+/*
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1965] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1966
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1966] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+--repeat for all 1967
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1967] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+--repeat for all 1968
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1968] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1969
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1969] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1970
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1970] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1971
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1971] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1971]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1972
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1972] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1972]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1973
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1973] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1973]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+
+--repeat for all 1974 
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+--it appears there are no operations from this year onwards
+select Lat_Long 
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+where lat_long is not null
+
+
+--repeat for all 1975
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+add Lat_Long Varchar(255)
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
+set Lat_Long = TGTLATDD_DDD_WGS84 + ', ' + TGTLONDDD_DDD_WGS84
+
+--a few last ditch strike missions one day prior to the fall of saigon in the neighboring province of dong nai
+select msndate, Lat_Long, MFUNC_DESC_CLASS, MFUNC_DESC
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+where lat_long is not null
+order by msndate desc
+*/
+
+
