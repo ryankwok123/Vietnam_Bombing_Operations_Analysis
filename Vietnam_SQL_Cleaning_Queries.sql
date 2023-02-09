@@ -92,6 +92,8 @@ update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
 set MSNDATE_Converted = Try_Convert(date, MSNDATE) --there is one invalid date (feb 29th) that needs to be removed
 
 
+
+
 --1971 has 367 rows instead of 365 
 --discovered the extra entries come from february and march due to different formating in the date
 --DISTINCT picks up 2/12/1971 & 19710212 as two different dates, but the conversion fixes this anyways so no biggie
@@ -232,19 +234,6 @@ set MSNDATE_Converted = Convert(date, MSNDATE)
 */
 ---------------------------------------------------------------------------------------------------------
 
---combining years together to form views for visualizations
---INCOMPLETE QUERY
-with combined as (
-	select THOR_DATA_VIET_ID, COUNTRYFLYINGMISSION, MSNDATE
-	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
-	union 
-	select THOR_DATA_VIET_ID, COUNTRYFLYINGMISSION, MSNDATE
-	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
-	--add other years to this once you figure it out
-)
-select *
-from combined
-
 ---------------------------------------------------------------------------------------------------------
 
 --number of missions flown by country (bar graph)
@@ -265,6 +254,106 @@ Select MILSERVICE, MILSERVICE_FORMATTED, COUNT(MILSERVICE_FORMATTED) num_mission
 from replace_null
 group by MILSERVICE, MILSERVICE_FORMATTED
 
+--milservice cleaning
+/*
+Select ISNULL(MILSERVICE, 'OTHER') as MILSERVICE_FORMATTED
+from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+
+--creating new column MILSERVICE_FORMATTED
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1965] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1966
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1966] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER') 
+
+--USAF is inputted as USA, fixing this typo by replacing all instances of USA with USAF
+--changing usa to usaf for 1966, 1969, 1970 
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1966]
+set MILSERVICE_FORMATTED = replace(replace(MILSERVICE_FORMATTED, 'USA', 'USAF'), 'USAFF', 'USAF')
+
+
+--repeat for 1967
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1967] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1967]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1968
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1968] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1968]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1969
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1969] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--USAF is inputted as USA, fixing this typo by replacing all instances of USA with USAF
+--changing usa to usaf for 1966, 1969, 1970 
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1969]
+set MILSERVICE_FORMATTED = replace(replace(MILSERVICE_FORMATTED, 'USA', 'USAF'), 'USAFF', 'USAF')
+
+
+--repeat for 1970
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1970] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--USAF is inputted as USA, fixing this typo by replacing all instances of USA with USAF
+--changing usa to usaf for 1966, 1969, 1970 
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
+set MILSERVICE_FORMATTED = replace(replace(MILSERVICE_FORMATTED, 'USA', 'USAF'), 'USAFF', 'USAF')
+
+
+--repeat for 1971
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1971] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1971]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1972
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1972] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1972]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1973
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1973] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1973]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1974
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1974]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+
+--repeat for 1975
+alter table [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+add MILSERVICE_FORMATTED varchar(50);
+
+update [Vietnam_Bombing_Operations].[dbo].[VietNam_1975]
+set MILSERVICE_FORMATTED = ISNULL(MILSERVICE, 'OTHER')
+*/
 ---------------------------------------------------------------------------------------------------------
 
 --experimenting here: determining number of missions flown per day, ordered by standardized date
