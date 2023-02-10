@@ -234,6 +234,17 @@ set MSNDATE_Converted = Convert(date, MSNDATE)
 */
 ---------------------------------------------------------------------------------------------------------
 
+--replaced nulls in tgtcountry with "Unknown"
+--repeated for all years/tables
+
+UPDATE [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+SET TGTCOUNTRY = ISNULL(TGTCOUNTRY, 'Unknown')
+
+select TGTCOUNTRY, count(THOR_DATA_VIET_ID)
+FROM [Vietnam_Bombing_Operations].[dbo].[VietNam_1965]
+group by TGTCOUNTRY
+
+
 ---------------------------------------------------------------------------------------------------------
 
 --number of missions flown by country (bar graph)

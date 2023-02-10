@@ -374,10 +374,91 @@ from total_hits_per_repeat_mission
 where count_num_hits_same_location_date = total_hits_same_location_date
 */
 
+
+--we back for part 3 boys 
+--adding latitude and longitude limits to prevent outliers in nonsensical areas obviously outside indochina
+/*
+Westernmost limit: Mae Sariang District, Thailand (18.548030, 97.369644)
+Northernmost limit: Lung Cu, Vietnam (23.390527, 105.322781)
+Easternmost limit: South China Sea (15.344668, 117.196773)
+Southernmost limit: South China Sea (6.051594, 107.924745)
+*/
+--also adding tgtcountry field which might be helpful when the points are too clustered
+--mission_location_geo2 had 1615431 rows and the new mission_location_geo3 has 1615312, dropped 119 rows
+
+/*
+Create View mission_location_geo3 as
+with mission_location_geo as (
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1965] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1966] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1967] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1968] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1969] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1970] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1971] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1972] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1973] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1974] 
+	where lat_long is not null
+	union
+	select THOR_DATA_VIET_ID, MFUNC_DESC_CLASS, MSNDATE_Converted, TGTLATDD_DDD_WGS84 as target_lat, TGTLONDDD_DDD_WGS84 as target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY
+	from [Vietnam_Bombing_Operations].[dbo].[VietNam_1975] 
+	where lat_long is not null
+), 
+
+count_repeat_missions as(
+--row_number counts duplicates that share the fields in partition by
+select *, ROW_NUMBER() over (partition by MFUNC_DESC_CLASS, MSNDATE_Converted, target_lat, target_long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED order by THOR_DATA_VIET_ID) as count_num_hits_same_location_date
+from mission_location_geo
+where MSNDATE_Converted is not null --two values in 1970 labelled feb 29th which does not exist. Not including these
+), 
+
+total_hits_per_repeat_mission as(
+--returning number of times same location/date was hit by getting max of row_number function
+select MFUNC_DESC_CLASS, MSNDATE_Converted, target_lat, target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED, TGTCOUNTRY, count_num_hits_same_location_date, Max(count_num_hits_same_location_date) over (partition by MFUNC_DESC_CLASS, MSNDATE_Converted, target_lat, target_long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED) as total_hits_same_location_date 
+from count_repeat_missions
+where MSNDATE_Converted is not null--two values in 1970 labelled feb 29th which does not exist. Not including these
+--group by MFUNC_DESC_CLASS, MSNDATE_Converted, target_lat, target_long, Lat_Long, MFUNC_DESC, COUNTRYFLYINGMISSION, MILSERVICE_FORMATTED,count_num_hits_same_location_date
+--order by Lat_Long, MSNDATE_Converted
+)
+select *
+from total_hits_per_repeat_mission
+--only selecting rows where row_number = max(row_number) and rows that fall within the latitude and longitude limits
+where count_num_hits_same_location_date = total_hits_same_location_date and CONVERT(decimal, target_lat) <= 23.390527 and CONVERT(decimal, target_lat) >= 6.051594 and CONVERT(decimal, target_long) >= 97.369644 and CONVERT(decimal, target_long) <= 117.196773
+*/
+
 -----------------------------------------------------------------------------------------------------------------
 
 --next visualization 
---Number of missions flown by branch over the entire war(pie)
+--Number of missions flown by branch over the entire war(bubble)
 
 Select MFUNC_DESC_CLASS, MILSERVICE_FORMATTED, COUNT(MILSERVICE_FORMATTED) as num_missions_by_branch
 from [Vietnam_Bombing_Operations].[dbo].[VietNam_1970]
