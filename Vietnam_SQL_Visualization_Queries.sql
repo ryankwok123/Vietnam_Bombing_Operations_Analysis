@@ -681,3 +681,48 @@ from cte
 where row_num_count = 1 --drop all duplicates, only keep first unique row 
 --order by VALID_AIRCRAFT_ROOT
 */
+
+
+--incorporating information from the aircraft glossary (full aircraft name/type and website)
+--return all data from both tables regardless of whether or not there is a matching aircraft root
+--first look to see where nulls show up
+--As expected, there are aircraft roots that exist in the data that are not found in the glossary 
+select *
+from [Vietnam_Bombing_Operations].[dbo].[aircraft_type_breakdown_tree_2] as aircraft_tree
+full outer join [Vietnam_Bombing_Operations].[dbo].[THOR_VIET_AIRCRAFT_GLOSS] as aircraft_gloss
+on aircraft_tree.VALID_AIRCRAFT_ROOT = aircraft_gloss.VALIDATED_ROOT
+
+
+
+--select for all the columns in aircraft_type_breakdown_tree_2 and left join aircraft name, website link, aircraft type and aircraft nickname
+with combine_aircraft_gloss as (
+select aircraft_tree.*, isnull(aircraft_gloss.AIRCRAFT_NAME, 'Unavailable') as AIRCRAFT_NAME, isnull(aircraft_gloss.WEBSITE_LINK, 'Unavailable') as WEBSITE_LINK, isnull(aircraft_gloss.AIRCRAFT_TYPE, 'Unavailable') as AIRCRAFT_TYPE, isnull(aircraft_gloss.AIRCRAFT_SHORTNAME, 'Unavailable') as AIRCRAFT_SHORTNAME
+, ROW_NUMBER() over (partition by countryflyingmission, mfunc_desc_class, valid_aircraft_root, periodofday_standardized order by valid_aircraft_root) as dupe_check --remove rows that return duplicates as a result of the left join (ie. left table record matches 2 right table records)
+from [Vietnam_Bombing_Operations].[dbo].[aircraft_type_breakdown_tree_2] as aircraft_tree
+left join [Vietnam_Bombing_Operations].[dbo].[THOR_VIET_AIRCRAFT_GLOSS] as aircraft_gloss
+on aircraft_tree.VALID_AIRCRAFT_ROOT = aircraft_gloss.VALIDATED_ROOT
+--order by aircraft_gloss.VALID_AIRCRAFT_ROOT
+)
+select *
+from combine_aircraft_gloss
+where dupe_check = 1
+order by combine_aircraft_gloss.VALID_AIRCRAFT_ROOT
+
+
+
+--and lasly, create another view for the updated tree diagram
+/*
+Create View aircraft_type_breakdown_tree_3 as
+with combine_aircraft_gloss as (
+select aircraft_tree.*, isnull(aircraft_gloss.AIRCRAFT_NAME, 'Unavailable') as AIRCRAFT_NAME, isnull(aircraft_gloss.WEBSITE_LINK, 'Unavailable') as WEBSITE_LINK, isnull(aircraft_gloss.AIRCRAFT_TYPE, 'Unavailable') as AIRCRAFT_TYPE, isnull(aircraft_gloss.AIRCRAFT_SHORTNAME, 'Unavailable') as AIRCRAFT_SHORTNAME
+, ROW_NUMBER() over (partition by countryflyingmission, mfunc_desc_class, valid_aircraft_root, periodofday_standardized order by valid_aircraft_root) as dupe_check --remove rows that return duplicates as a result of the left join (ie. left table record matches 2 right table records)
+from [Vietnam_Bombing_Operations].[dbo].[aircraft_type_breakdown_tree_2] as aircraft_tree
+left join [Vietnam_Bombing_Operations].[dbo].[THOR_VIET_AIRCRAFT_GLOSS] as aircraft_gloss
+on aircraft_tree.VALID_AIRCRAFT_ROOT = aircraft_gloss.VALIDATED_ROOT
+--order by aircraft_gloss.VALID_AIRCRAFT_ROOT
+)
+select *
+from combine_aircraft_gloss
+where dupe_check = 1
+--order by combine_aircraft_gloss.VALID_AIRCRAFT_ROOT
+*/
